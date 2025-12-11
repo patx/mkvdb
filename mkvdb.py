@@ -84,3 +84,8 @@ class Mkv:
         await self.collection.delete_many({})
         return True
 
+    @dualmethod
+    async def close(self) -> None:
+        """Close the underlying MongoDB client."""
+        self.client.close()
+

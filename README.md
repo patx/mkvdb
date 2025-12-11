@@ -5,8 +5,7 @@ and is safe across multiple processes and workers thanks to MongoDB’s concurre
 Is it a little pointless if you already know Mongo? Yeah. But if ya just want to
 `set` and `get` without thinking about collections or schemas, it’s perfect. I made this
 because [pickleDB](https://patx.github.io/pickledb) doesn't play nice with ASGI but I
-like its dumb API anyway :) There's no docs yet, so just look at the source code - 
-its really short I promise.
+like its dumb API anyway :) [Read a little more about mkvDB in this blog post.](https://thoughts.harrisonerd.com/post/693a32cee5c413ce5f061c19)
 
 ```python
 from mkvdb import Mkv
