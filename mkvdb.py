@@ -8,6 +8,7 @@ import asyncio
 from typing import Any, Optional, List
 
 from pymongo import MongoClient, AsyncMongoClient
+from bson import ObjectId 
 
 
 def in_async() -> bool:
@@ -36,17 +37,28 @@ class Mkv:
         self._sync_db = self._sync_client[db_name]
         self._sync_collection = self._sync_db[collection_name]
 
-    def set(self, key: Any, value: Any) -> Any:
-        """Set a key-value pair. Overwrites if the key already exists."""
+    def set(self, key: str, value: Any) -> str:
+        """Set a key-value pair."""
         if in_async():
-            async def _aset() -> bool:
-                await self.collection.update_one({"_id": str(key)},
+            async def _aset() -> str:
+                if key is None:
+                    new_id = str(ObjectId())
+                    await self.collection.insert_one({"_id": new_id, 
+                        "value": value})
+                    return new_id
+                key_str = str(key)
+                await self.collection.update_one({"_id": key_str},
                     {"$set": {"value": value}}, upsert=True,)
-                return True
+                return key_str
             return _aset()
-        self._sync_collection.update_one({"_id": str(key)},
-            {"$set": {"value": value}}, upsert=True,)
-        return True
+        if key is None:
+            new_id = str(ObjectId())
+            self._sync_collection.insert_one({"_id": new_id, "value": value})
+            return new_id
+        key_str = str(key)
+        self._sync_collection.update_one({"_id": key_str},
+            {"$set": {"value": value}},upsert=True,)
+        return key_str
 
     def get(self, key: Any, default: Optional[Any] = None) -> Any:
         """Get the value for a key. """

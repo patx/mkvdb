@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>mkvDB — User Guide &amp; API Reference</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --bg: #f5f5f5;
+      --fg: #111827;
+      --muted: #6b7280;
+      --accent: #16a34a;
+      --border: #e5e7eb;
+      --code-bg: #111827;
+      --code-fg: #e5e7eb;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.6;
+    }
+
+    .page {
+      max-width: 840px;
+      margin: 0 auto;
+      padding: 32px 16px 64px;
+    }
+
+    header {
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h1, h2, h3, h4 {
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin: 0 0 4px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin: 0 0 12px;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    p {
+      margin: 0 0 1rem;
+    }
+
+    ul, ol {
+      margin: 0 0 1rem 1.5rem;
+      padding: 0;
+    }
+
+    code {
+      font-family: var(--mono);
+      font-size: 0.9em;
+      background: #e5e7eb;
+      padding: 0.1em 0.3em;
+      border-radius: 4px;
+    }
+
+    pre {
+      margin: 0 0 1.25rem;
+      padding: 12px 14px;
+      background: var(--code-bg);
+      color: var(--code-fg);
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 0.9rem;
+    }
+
+    pre code {
+      background: transparent;
+      padding: 0;
+      border-radius: 0;
+    }
+
+    .section {
+      margin-bottom: 32px;
+      border: dotted 1px;
+      padding: 10px;
+    }
+
+    .tagline {
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    .api-heading {
+      margin-top: 32px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+
+    .callout-list {
+      list-style: none;
+      margin: 0 0 1rem;
+      padding: 0;
+    }
+
+    .callout-list li::before {
+      content: "•";
+      margin-right: 0.5rem;
+      color: var(--accent);
+    }
+
+    .callout-list li {
+      margin-bottom: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <h1>mkvDB</h1>
+      <p class="subtitle">Tiny async/sync key–value store on top of MongoDB.</p>
+      <p class="tagline">
+        <a href="https://patx.github.io/mkvDB" target="_blank" rel="noopener noreferrer">GitHub Repo</a>
+        &middot;
+        <a href="https://harrisonerd.com/" target="_blank" rel="noopener noreferrer">Harrison Erd</a>
+        &middot; BSD 3-Clause
+      </p>
+    </header>
+
+    <section class="section" style="border: 0px;">
+      <h2>User Guide</h2>
+      <p><code>mkvDB</code> is a tiny key–value store wrapper around MongoDB.</p>
+      <ul class="callout-list">
+        <li>One collection, one document per key</li>
+        <li>Works synchronously and asynchronously with the same API</li>
+        <li>Stores any BSON-serializable Python object as the value</li>
+        <li>Automatically generates IDs when you don&rsquo;t care about the key</li>
+      </ul>
+      <p>Think of it as: <em>&ldquo;I am a lazy programmer and I just want <code>set</code> and <code>get</code> over Mongo.&rdquo;</em></p>
+    </section>
+
+    <section class="section" style="border: 0px;">
+      <h3>Installation</h3>
+      <pre><code class="language-bash">pip install mkvdb</code></pre>
+      <p>You&rsquo;ll also need a running MongoDB instance and a valid connection URI, for example:</p>
+      <pre><code class="language-bash">mongodb://localhost:27017</code></pre>
+    </section>
+
+    <section class="section" style="border: 0px;">
+      <h3>Core Concepts</h3>
+      <p>Each key is stored as a single MongoDB document:</p>
+      <pre><code class="language-json">{
+  "_id": "&lt;str(key)&gt;",
+  "value": &lt;your_data&gt;
+}</code></pre>
+      <ul>
+        <li>Keys are always stored as strings (<code>str(key)</code>), but you can pass any object that has a sensible <code>str()</code>.</li>
+        <li>Values must be BSON-serializable (anything PyMongo can store: dicts, lists, ints, strings, datetimes, etc.).</li>
+        <li>
+          The library auto-detects whether it&rsquo;s running inside an
+          <code>asyncio</code> event loop:
+          <ul>
+            <li><strong>Inside async code</strong>: methods return <strong>coroutines</strong> &rarr; you must <code>await</code> them.</li>
+            <li><strong>Outside async code</strong>: methods run <strong>synchronously</strong> and return results directly.</li>
+          </ul>
+        </li>
+      </ul>
+      <p>Same methods, two modes.</p>
+    </section>
+
+    <section class="section" style="border: 0px;">
+      <h3>Quickstart</h3>
+
+      <h4>Synchronous usage</h4>
+      <pre><code class="language-python">from mkvdb import Mkv
+
+db = Mkv("mongodb://localhost:27017")
+
+# Set a value with an explicit key
+db.set("username", "harrison")
+
+# Get it back
+print(db.get("username"))  # -&gt; "harrison"
+
+# Set a value with an auto-generated key
+note_id = db.set(None, {"title": "mkvDB", "tags": ["mongo", "kv"]})
+print(note_id)  # -&gt; e.g. "677eec65e92eeca23513fe99"
+
+# List all keys
+print(db.all())  # -&gt; ["username", "677eec65e92eeca23513fe99", ...]
+
+# Remove a key
+db.remove("username")
+
+# Clear everything
+db.purge()
+
+# Close connections when you’re done
+db.close()</code></pre>
+
+      <h4>Asynchronous usage</h4>
+      <pre><code class="language-python">import asyncio
+from mkvdb import Mkv
+
+db = Mkv("mongodb://localhost:27017")
+
+async def main():
+    # Set a value with explicit key
+    await db.set("counter", 1)
+
+    # Increment and save again
+    current = await db.get("counter", 0)
+    await db.set("counter", current + 1)
+
+    # Auto-generated key
+    new_id = await db.set(None, {"hello": "world"})
+    print("New id:", new_id)
+
+    # List all keys
+    keys = await db.all()
+    print("Keys:", keys)
+
+    # Remove key
+    deleted = await db.remove("counter")
+    print("Deleted:", deleted)
+
+    # Purge all keys
+    await db.purge()
+
+    # Close connections
+    await db.close()
+
+asyncio.run(main())</code></pre>
+    </section>
+
+    <section class="section" style="border: 0px;">
+      <h3>When is it sync vs async?</h3>
+      <p>The library uses:</p>
+      <pre><code class="language-python">def in_async() -&gt; bool:
+    try:
+        asyncio.get_running_loop()
+        return True
+    except RuntimeError:
+        return False</code></pre>
+      <ul>
+        <li>If there is a running event loop, methods like <code>set</code>, <code>get</code>, etc. return <strong>coroutines</strong>.</li>
+        <li>If there is no running loop, they execute synchronously.</li>
+      </ul>
+      <p>Examples:</p>
+      <pre><code class="language-python"># Sync context
+db = Mkv("mongodb://localhost:27017")
+db.set("x", 1)               # OK
+value = db.get("x")          # OK
+
+# Async context
+async def foo():
+    db = Mkv("mongodb://localhost:27017")
+    await db.set("x", 1)     # must await
+    value = await db.get("x")
+
+# Don’t do this in async code:
+db.set("x", 1)   # returns a coroutine, but you never await it</code></pre>
+    </section>
+
+    <section class="section api-heading" style="border: 0px;">
+      <h2>API Reference</h2>
+    </section>
+
+    <section class="section">
+      <h3><code>class Mkv</code></h3>
+      <p>Create a new mkvDB instance.</p>
+      <h4>Parameters</h4>
+      <ul>
+        <li><code>mongo_uri</code> (<code>str</code>): MongoDB connection string.</li>
+        <li><code>db_name</code> (<code>str</code>, default <code>"mkv"</code>): Database name.</li>
+        <li><code>collection_name</code> (<code>str</code>, default <code>"kv"</code>): Collection name.</li>
+      </ul>
+      <p>Internally it maintains:</p>
+      <ul>
+        <li>An async client &amp; collection:
+          <ul>
+            <li><code>self._async_client = AsyncMongoClient(mongo_uri)</code></li>
+            <li><code>self.db</code>, <code>self.collection</code></li>
+          </ul>
+        </li>
+        <li>A sync client &amp; collection:
+          <ul>
+            <li><code>self._sync_client = MongoClient(mongo_uri)</code></li>
+            <li><code>self._sync_db</code>, <code>self._sync_collection</code></li>
+          </ul>
+        </li>
+      </ul>
+      <p>These are used automatically based on sync/async context.</p>
+    </section>
+
+    <section class="section">
+      <h3><code>set</code></h3>
+      <p>Set a value for a given key. If <code>key</code> is <code>None</code>, a new ObjectId-based key will be generated.</p>
+
+      <h4>Behavior</h4>
+      <ul>
+        <li><strong>Sync</strong>: executes immediately, returns the string key.</li>
+        <li><strong>Async</strong>: returns a coroutine; awaiting it yields the string key.</li>
+      </ul>
+
+      <h4>Parameters</h4>
+      <ul>
+        <li><code>key</code> (<code>Any</code> or <code>None</code>):
+          <ul>
+            <li>If not <code>None</code>: converted to <code>str(key)</code> and used as <code>_id</code>.</li>
+            <li>If <code>None</code>: a new <code>ObjectId()</code> is generated and used as <code>_id</code>.</li>
+          </ul>
+        </li>
+        <li><code>value</code> (<code>Any</code>): Any BSON-serializable object to store.</li>
+      </ul>
+
+      <h4>Returns</h4>
+      <p><code>str</code>: The key used for this record.</p>
+
+      <h4>Examples (sync)</h4>
+      <pre><code class="language-python">db.set("user:1", {"name": "Alice"})
+auto_id = db.set(None, {"name": "Bob"})</code></pre>
+
+      <h4>Examples (async)</h4>
+      <pre><code class="language-python">key = await db.set("session:123", {"state": "active"})
+new_id = await db.set(None, {"foo": "bar"})</code></pre>
+    </section>
+
+    <section class="section">
+      <h3><code>get</code></h3>
+      <p>Fetch the value for a given key.</p>
+
+      <h4>Behavior</h4>
+      <ul>
+        <li><strong>Sync</strong>: executes immediately, returns the stored value or <code>default</code> if not found.</li>
+        <li><strong>Async</strong>: returns a coroutine; awaiting it yields the stored value or <code>default</code>.</li>
+      </ul>
+
+      <h4>Parameters</h4>
+      <ul>
+        <li><code>key</code> (<code>Any</code>): Key to look up (converted to <code>str(key)</code> for <code>_id</code>).</li>
+        <li><code>default</code> (<code>Any</code>, default <code>None</code>): Value to return if the key does not exist.</li>
+      </ul>
+
+      <h4>Returns</h4>
+      <p>The stored value, or <code>default</code> if no document exists for that key.</p>
+
+      <h4>Examples (sync)</h4>
+      <pre><code class="language-python">user = db.get("user:1", default={})
+missing = db.get("nope", default="N/A")  # -&gt; "N/A"</code></pre>
+
+      <h4>Examples (async)</h4>
+      <pre><code class="language-python">user = await db.get("user:1", default=None)</code></pre>
+    </section>
+
+    <section class="section">
+      <h3><code>remove</code></h3>
+      <p>Delete a single document by key.</p>
+
+      <h4>Behavior</h4>
+      <ul>
+        <li><strong>Sync</strong>: executes immediately, returns <code>True</code> if a document was deleted, <code>False</code> otherwise.</li>
+        <li><strong>Async</strong>: returns a coroutine; awaiting it yields <code>True</code> or <code>False</code>.</li>
+      </ul>
+
+      <h4>Parameters</h4>
+      <ul>
+        <li><code>key</code> (<code>Any</code>): Key to remove (converted to <code>str(key)</code> for <code>_id</code>).</li>
+      </ul>
+
+      <h4>Returns</h4>
+      <p><code>bool</code>: <code>True</code> if a document was deleted, <code>False</code> otherwise.</p>
+
+      <h4>Examples (sync)</h4>
+      <pre><code class="language-python">deleted = db.remove("user:1")
+if deleted:
+    print("User removed")</code></pre>
+
+      <h4>Examples (async)</h4>
+      <pre><code class="language-python">deleted = await db.remove("user:1")</code></pre>
+    </section>
+
+    <section class="section">
+      <h3><code>all</code></h3>
+      <p>List all keys (all <code>_id</code> values) in the collection.</p>
+
+      <h4>Behavior</h4>
+      <ul>
+        <li><strong>Sync</strong>: executes immediately, returns a <code>list[str]</code>.</li>
+        <li><strong>Async</strong>: returns a coroutine; awaiting it yields a <code>list[str]</code>.</li>
+      </ul>
+
+      <h4>Returns</h4>
+      <p><code>List[str]</code>: All keys currently stored.</p>
+
+      <h4>Examples (sync)</h4>
+      <pre><code class="language-python">keys = db.all()
+print(keys)  # -&gt; ["user:1", "note:abc", ...]</code></pre>
+
+      <h4>Examples (async)</h4>
+      <pre><code class="language-python">keys = await db.all()</code></pre>
+    </section>
+
+    <section class="section">
+      <h3><code>purge</code></h3>
+      <p>Delete <strong>all</strong> documents in the collection. Use with care.</p>
+
+      <h4>Behavior</h4>
+      <ul>
+        <li><strong>Sync</strong>: executes immediately, returns <code>True</code> once the operation completes.</li>
+        <li><strong>Async</strong>: returns a coroutine; awaiting it yields <code>True</code>.</li>
+      </ul>
+
+      <h4>Returns</h4>
+      <p><code>bool</code>: Always <code>True</code> if no exception is raised.</p>
+
+      <h4>Examples (sync)</h4>
+      <pre><code class="language-python">db.purge()  # All keys gone</code></pre>
+
+      <h4>Examples (async)</h4>
+      <pre><code class="language-python">await db.purge()</code></pre>
+    </section>
+
+    <section class="section">
+      <h3><code>close</code></h3>
+      <p>Close both the async and sync MongoDB clients.</p>
+
+      <h4>Behavior</h4>
+      <ul>
+        <li><strong>Sync</strong>:
+          <ul>
+            <li>Calls <code>asyncio.run(self._async_client.close())</code>.</li>
+            <li>Calls <code>self._sync_client.close()</code>.</li>
+            <li>Returns <code>None</code>.</li>
+          </ul>
+        </li>
+        <li><strong>Async</strong>: returns a coroutine that:
+          <ul>
+            <li><code>await self._async_client.close()</code></li>
+            <li><code>self._sync_client.close()</code></li>
+            <li>Awaited result is <code>None</code>.</li>
+          </ul>
+        </li>
+      </ul>
+
+      <h4>Examples (sync)</h4>
+      <pre><code class="language-python">db.close()</code></pre>
+
+      <h4>Examples (async)</h4>
+      <pre><code class="language-python">await db.close()</code></pre>
+
+      <p>Closing is optional in short-lived scripts, but recommended in long-running apps and tests.</p>
+    </section>
+
+    <section class="section">
+      <h3>Error Handling</h3>
+      <p>The current implementation doesn&rsquo;t wrap MongoDB errors – any connection or operation issue will bubble up as a PyMongo/AsyncMongo exception. Typical things you might see:</p>
+      <ul>
+        <li>Connection failures</li>
+        <li>Serialization errors for non-BSON-compatible values</li>
+        <li>Authentication/authorization errors if your URI is locked down</li>
+      </ul>
+      <p>You can catch them at the call site:</p>
+      <pre><code class="language-python">from pymongo.errors import PyMongoError
+
+try:
+    db.set("x", object())
+except PyMongoError as e:
+    print("Mongo blew up:", e)</code></pre>
+    </section>
+
+  </div>
+</body>
+</html>
+

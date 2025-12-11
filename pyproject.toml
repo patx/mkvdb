@@ -4,7 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "mkvdb"
-version = "0.2"
+version = "0.3"
 description = "MongoDB-backed async/sync key–value store with a super tiny API."
 keywords = [
     "key-value",
@@ -36,4 +36,5 @@ classifiers = [
 
 [project.urls]
 Repository = "https://github.com/patx/mkvdb"
+Homepage = "https://patx.github.io/mkvdb"
 
