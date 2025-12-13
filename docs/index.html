@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>mkvDB — User Guide &amp; API Reference</title>
+  <title>mongoKV — User Guide &amp; API Reference</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     :root {
@@ -134,12 +134,12 @@
 <body>
   <div class="page">
     <header>
-      <h1>mkvDB</h1>
+      <h1>mongoKV</h1>
       <p class="subtitle">Tiny async/sync key–value store on top of MongoDB.</p>
       <p class="tagline">
-        <a href="https://github.com/patx/mkvDB" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="https://github.com/patx/mongokv" target="_blank" rel="noopener noreferrer">GitHub</a>
         &middot;
-        <a href="https://pypi.org/project/mkvdb/" target="_blank" rel="noopener noreferrer">PyPI</a>
+        <a href="https://pypi.org/project/mongokv/" target="_blank" rel="noopener noreferrer">PyPI</a>
         &middot;
         <a href="https://harrisonerd.com/" target="_blank" rel="noopener noreferrer">Author</a>
         &middot; BSD 3-Clause
@@ -148,7 +148,7 @@
 
     <section class="section" style="border: 0px;">
       <h2>User Guide</h2>
-      <p><code>mkvDB</code> is a tiny key–value store wrapper around MongoDB.</p>
+      <p><code>mongoKV</code> is a tiny key–value store wrapper around MongoDB.</p>
       <ul class="callout-list">
         <li>One collection, one document per key</li>
         <li>Works synchronously and asynchronously with the same API</li>
@@ -160,7 +160,7 @@
 
     <section class="section" style="border: 0px;">
       <h3>Installation</h3>
-      <pre><code class="language-bash">pip install mkvdb</code></pre>
+      <pre><code class="language-bash">pip install mongokv</code></pre>
       <p>You&rsquo;ll also need a running MongoDB instance and a valid connection URI, for example:</p>
       <pre><code class="language-bash">mongodb://localhost:27017</code></pre>
     </section>
@@ -191,7 +191,7 @@
       <h3>Quickstart</h3>
 
       <h4>Synchronous usage</h4>
-      <pre><code class="language-python">from mkvdb import Mkv
+      <pre><code class="language-python">from mongokv import Mkv
 
 db = Mkv("mongodb://localhost:27017")
 
@@ -202,7 +202,7 @@ db.set("username", "harrison")
 print(db.get("username"))  # -&gt; "harrison"
 
 # Set a value with an auto-generated key
-note_id = db.set(None, {"title": "mkvDB", "tags": ["mongo", "kv"]})
+note_id = db.set(None, {"title": "mongoKV", "tags": ["mongo", "kv"]})
 print(note_id)  # -&gt; e.g. "677eec65e92eeca23513fe99"
 
 # List all keys
@@ -219,7 +219,7 @@ db.close()</code></pre>
 
       <h4>Asynchronous usage</h4>
       <pre><code class="language-python">import asyncio
-from mkvdb import Mkv
+from mongokv import Mkv
 
 db = Mkv("mongodb://localhost:27017")
 
@@ -258,7 +258,7 @@ asyncio.run(main())</code></pre>
 
     <section class="section">
       <h3><code>class Mkv</code></h3>
-      <p>Create a new mkvDB instance.</p>
+      <p>Create a new mongoKV instance.</p>
       <h4>Parameters</h4>
       <ul>
         <li><code>mongo_uri</code> (<code>str</code>): MongoDB connection string.</li>

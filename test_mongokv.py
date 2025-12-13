@@ -6,7 +6,7 @@ import uuid
 import pytest
 import pytest_asyncio
 
-from mkvdb import Mkv
+from mongokv import Mkv
 
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
 
