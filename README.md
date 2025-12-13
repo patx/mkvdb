@@ -1,4 +1,4 @@
-**mongoDB** is a unified sync + async key-value store backed by `pymongo` that 
+**mongoKV** is a unified sync + async key-value store backed by `pymongo` that 
 provides a dead-simple Redis-like API (`set`, `get`, `remove`, etc). MongoDB 
 handles concurrency — safe across threads, processes, and ASGI workers.
 
