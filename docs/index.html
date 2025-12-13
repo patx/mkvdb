@@ -218,16 +218,9 @@
       <ul>
         <li>Keys are always stored as strings (<code>str(key)</code>), but you can pass any object with a sensible <code>str()</code>.</li>
         <li>Values must be BSON-serializable (anything PyMongo can store: dicts, lists, ints, strings, datetimes, etc.).</li>
-        <li>
-          This is a normal MongoDB collection. You can always access the same data
-          directly using PyMongo as your needs grow — no migrations required.
-        </li>
-        <li>
-          Safe across threads, processes, and ASGI workers — MongoDB handles locking and atomicity.
-        </li>
-        <li>
-          The library auto-detects whether it&rsquo;s running inside an
-          <code>asyncio</code> event loop:
+        <li>This is a normal MongoDB collection. You can always access the same data directly using PyMongo as your needs grow — no migrations required.</li>
+        <li>Safe across threads, processes, and ASGI workers — MongoDB handles locking and atomicity.</li>
+        <li>The library auto-detects whether it&rsquo;s running inside an <code>asyncio</code> event loop:
           <ul>
             <li><strong>Inside async code</strong>: methods return <strong>coroutines</strong> &rarr; you must <code>await</code> them.</li>
             <li><strong>Outside async code</strong>: methods run <strong>synchronously</strong> and return results directly.</li>
@@ -493,7 +486,7 @@ print(keys)  # -&gt; ["user:1", "note:abc", ...]</code></pre>
       <ul>
         <li><strong>Sync</strong>:
           <ul>
-            <li>Calls <code>asyncio.run(self._async_client.close())</code>.</li>
+            <li>Calls <code>self._async_client.close()</code> using <code>asyncio.run()</code>.</li>
             <li>Calls <code>self._sync_client.close()</code>.</li>
             <li>Returns <code>None</code>.</li>
           </ul>

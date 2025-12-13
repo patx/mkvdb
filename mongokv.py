@@ -1,5 +1,5 @@
 """
-mongoKV - https://patx.github.io/mongoKV
+mongoKV - https://patx.github.io/mongokv
 Harrison Erd - https://harrisonerd.com/
 Licensed - BSD 3 Clause (see LICENSE)
 """
